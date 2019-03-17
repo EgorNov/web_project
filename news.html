@@ -1,0 +1,135 @@
+</label><br>
+<input type="text" id="topic_title" name="topic_title" value="" class="input-wide" required><br>
+<span class="note">
+Заголовок должен быть наполнен смыслом, чтобы можно было понять, о чем будет топик.<br>Запрещены названия заглавными буквами (CAPS LOCK).</span></p>
+<p>
+<label for="topic_text">Текст:</label>
+<script language="JavaScript">
+
+	// Превью сообщения
+	function preview_form()
+	{
+		var form_data = $('#textarea_form').val();
+		if (form_data.length < 3) { alert("Минимальная длина сообщения 3 символа"); return false; }
+		$.post("/ajax/preview.form.php", { text: form_data }, function(data){ $('#preview_div').slideDown().html(data); spoiler_activate(); $.scrollTo('#preview_div');});
+	}
+
+	// Переход к родителю комменту
+	function show_parrent_comment(id)
+	{
+		$("ul").removeClass('show_parrent');
+		$("#ul_comment_" + id).addClass('show_parrent');
+		$.scrollTo('#comment_id_' + id, 500);
+		return false;
+	}
+
+	// Вставка тегов
+	tager = {
+		insertTags: function(tagName){ tager.insertTag('<'+tagName+'>', '</'+tagName+'>'); return false; },
+		insertTagWithText: function(tagName){ if (document.getSelection) { var selection = document.getSelection() } else if (document.selection) { var selection = document.selection.createRange().text; } else { var selection = ''; } tager.insertTag('<'+tagName+'>' + selection, '</'+tagName+'>'); return false; },
+		insertImage: function(){ $.nmManual('/ajax/form.image.upload.php', {callbacks: {beforeShowBg: function() { $('body').css('overflow','hidden') },afterClose: function() { $('body').css('overflow','inherit') }}}); return false; },
+		insertLink: function(){ var href = prompt('Введите URL ссылки', 'http://'); if(href){ tager.insertTag('<a href="' + href + '">', '</a>'); } return false; },
+		insertVideo: function(){ var href = prompt("Введите URL страницы с видео\nподдерживаются:\nyoutube.com, vimeo.com, cybergame.tv, stopgame.ru", 'http://'); if(href){ tager.insertTag('<video>' + href, '</video>'); } return false; },
+		insertSpoiler: function(){ tager.insertTag('<spoiler title="скрытый текст">', '</spoiler>'); return false; },
+		insertTagsClass: function(tagName, className){ tager.insertTag('<'+tagName+' class="'+className+'">', '</'+tagName+'>'); return false; },
+		insertCut: function(){ tager.insertTag('<cut>', ''); return false; },
+		insertTag: function(startTag, endTag, repObj){ var textarea = document.getElementById("textarea_form"); textarea.focus(); var scrtop = textarea.scrollTop; var cursorPos = tager.getCursor(textarea); var txt_pre = textarea.value.substring(0, cursorPos.start); var txt_sel = textarea.value.substring(cursorPos.start, cursorPos.end); var txt_aft = textarea.value.substring(cursorPos.end); if(repObj){ txt_sel = txt_sel.replace(/\r/g, ''); txt_sel = txt_sel != '' ? txt_sel : ' '; txt_sel = txt_sel.replace(new RegExp(repObj.findStr, 'gm'), repObj.repStr); } if (cursorPos.start == cursorPos.end){ var nuCursorPos = cursorPos.start + startTag.length; }else{ var nuCursorPos=String(txt_pre + startTag + txt_sel + endTag).length; } textarea.value = txt_pre + startTag + txt_sel + endTag + txt_aft; tager.setCursor(textarea, nuCursorPos, nuCursorPos); if (scrtop) textarea.scrollTop = scrtop; return false;},insertList: function(){var startTag = '<' + link.value + '>\n';var endTag = '\n</' + link.value + '>';var repObj = {findStr: '^(.+)', repStr: '\t<li>$1</li>'}; tager.insertTag(startTag, endTag, repObj); link.selectedIndex = 0; },getCursor:function(input){var result={start:0,end:0};if(input.setSelectionRange){result.start=input.selectionStart;result.end=input.selectionEnd}else if(!document.selection){return false}else if(document.selection&&document.selection.createRange){var range=document.selection.createRange();var stored_range=range.duplicate();stored_range.moveToElementText(input);stored_range.setEndPoint('EndToEnd',range);result.start=stored_range.text.length-range.text.length;result.end=result.start+range.text.length}return result},setCursor:function(textarea,start,end){if(textarea.createTextRange){var range=textarea.createTextRange();range.move("character",start);range.select()}else if(textarea.selectionStart){textarea.setSelectionRange(start,end)}}
+	}
+
+	function help_tags()	{ $('div.help_tags_data').toggle(); }
+
+</script>
+
+<div id="preview_div" class="main_text preview_form hide"></div>
+
+<div class="panel_form" style="background: #eaecea; margin-top: 2px;" id="form_buttons">
+<a href="#" class="button" onclick="return tager.insertTags('b');"><img src="https://stopga.me/images/blogs/panel/bold_ru.gif" width="20" height="20" title="жирный"></a>
+<a href="#" class="button" onclick="return tager.insertTags('i');"><img src="https://stopga.me/images/blogs/panel/italic_ru.gif" width="20" height="20" title="курсив"></a>
+<a href="#" class="button" onclick="return tager.insertTags('u');"><img src="https://stopga.me/images/blogs/panel/underline_ru.gif" width="20" height="20" title="подчеркнутый"></a>
+<a href="#" class="button" onclick="return tager.insertTags('s');"><img src="https://stopga.me/images/blogs/panel/strikethrough.gif" width="20" height="20" title="зачеркнутый"></a>
+
+&nbsp;
+<a href="#" class="button" onclick="return tager.insertTagsClass('p', 'left');"><img src="https://stopga.me/images/blogs/panel/left.gif" width="20" height="20" title="выравнивание по левому краю"></a>
+<a href="#" class="button" onclick="return tager.insertTagsClass('p', 'center');"><img src="https://stopga.me/images/blogs/panel/center.gif" width="20" height="20" title="выравнивание по центру"></a>
+<a href="#" class="button" onclick="return tager.insertTagsClass('p', 'right');"><img src="https://stopga.me/images/blogs/panel/right.gif" width="20" height="20" title="выравнивание по правому краю"></a>
+
+&nbsp;
+<a href="#" class="button" onclick="return tager.insertLink();"><img src="https://stopga.me/images/blogs/panel/link.gif" width="20" height="20" title="вставить ссылку"></a>
+<a href="#" class="button" onclick="return tager.insertTagWithText('blockquote');"><img src="https://stopga.me/images/blogs/panel/quote.gif" width="20" height="20" title="цитировать выделенный текст"></a>
+<!-- <a href="#" class="button" onclick="return tager.insertTagWithText('code');"><img src="https://stopga.me/images/blogs/panel/code.gif" width="30" height="20" title="код"></a> -->
+<a href="#" class="button" onclick="return tager.insertSpoiler();"><img src="https://stopga.me/images/blogs/panel/spoiler.gif" width="41" height="20" title="спойлер"></a>
+<a href="#" class="button" onclick="return tager.insertImage();"><img src="https://stopga.me/images/blogs/panel/img.gif" width="20" height="20" title="закачать/вставить изображение"></a>
+<a href="#" class="button" onclick="return tager.insertVideo();"><img src="https://stopga.me/images/blogs/panel/video.gif" width="20" height="20" title="вставить видео"></a>
+<div class="float-right"><a href="#" class="help_tags" onclick="help_tags();return false;">Правила и помощь по тегам</a></div>
+<div class="help_tags_data hide">
+<strong>В форму разрешено добавлять html теги:</strong>
+<b>&lt;b&gt;</b> - Выделение текста <b>жирным</b> начертанием.<br>
+<b>&lt;i&gt;</b> - Выделение текста <i>наклонным</i> начертанием.<br>
+<b>&lt;u&gt;</b> - Выделение текста <u>подчеркнутым</u> начертанием.<br>
+<b>&lt;s&gt;</b> - <s>Зачеркнутый</s> текст.<br>
+<b>&lt;a href="http://..."&gt;текст&lt;/a&gt;</b> - Вставка ссылки<br>
+<b>&lt;blockquote&gt;цитата&lt;/blockquote&gt;</b> - Указание цитаты, можно выделить текст на странице и нажать кнопку цитаты.<br>
+<b>&lt;video&gt;http://...&lt;/video&gt;</b> - Добавление видео в сообщение. Указывать необходимо только ссылку (тег object не поддерживается).<br>
+<br>
+<div style="line-height:17px;">
+<strong>У нас запрещено:</strong>
+- "первонахство" - "я первый, второй" и т.д.;<br>
+- "пустые" комментарии вида "ага", "клево", "супер", "пеши исчо", "аффтар мудак";<br>
+- сообщения CAPS LOCK'ом;<br>
+- выкрики - "ура", "супер", многовосклицание и т.д.<br><br>
+
+<strong>У нас положено:</strong>
+- все картинки размером более чем 300x300 пикселей скрывать в теге SPOILER;<br>
+- все встраиваемое видео скрывать в теге SPOILER;<br>
+- цитировать сообщения, выделив нужный текст и нажать кнопку "цитировать".<br><br>
+
+За нарушения будут выписаны замечания вплоть до бана аккаунта.<br><br>
+<br>
+
+</div>
+</div>
+</div><textarea name="topic_text" id="textarea_form" rows="25" class="input-textarea" required></textarea>
+</p>
+
+<p>
+<label for="topic_tags">Метки:</label><br>
+<input type="text" id="topic_tags" name="topic_tags" value="" class="input-wide" required><br>
+<span class="note">Метки нужно разделять запятой. Например: игры, starcraft, diablo, блоги.</span>
+</p>
+<p>
+<label for="topic_games">Привязать игру(ы):</label><br>
+<input type="text" id="topic_games" name="topic_games" value="" class="input-wide"><br>
+<span class="note">Вы можете привязать к теме одну или несколько игр (до 10), тогда ваш топик будет виден в карточке игры и привлечет больше читающих (при ложном упоминании игры - тема будет удалена). Работает автоподстановка.</span>
+</p>
+
+<div id="game_list">
+</div>
+<p>
+<input type="checkbox" id="topic_first_comment" name="topic_first_comment" class="checkbox" value="1" checked>
+<label for="topic_first_comment">опубликовать "первый комментарий" для вывода в "прямой эфир"</label>
+</p>
+
+<p>
+<input type="checkbox" id="topic_forbid_comment" name="topic_forbid_comment" class="checkbox" value="1">
+<label for="topic_forbid_comment">запретить комментировать</label>
+</p>
+<p>
+<input type="file" name="topic_logo" id="topic_logo" class="inputfile" accept="image/*">
+<label for="topic_logo"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="17" viewBox="0 0 20 17"><path d="M10 0l-5.2 4.9h3.3v5.1h3.8v-5.1h3.3l-5.2-4.9zm9.3 11.5l-3.2-2.1h-2l3.4 2.6h-3.5c-.1 0-.2.1-.2.1l-.8 2.3h-6l-.8-2.2c-.1-.1-.1-.2-.2-.2h-3.6l3.4-2.6h-2l-3.2 2.1c-.4.3-.7 1-.6 1.5l.6 3.1c.1.5.7.9 1.2.9h16.3c.6 0 1.1-.4 1.3-.9l.6-3.1c.1-.5-.2-1.2-.7-1.5z"/></svg> <span>Логотип для темы&hellip;</span></label><br>
+
+<span class="note">Изображение, которое будет отображаться в списке топиков. Рекомендуемый минимальный размер <strong>1280х720</strong> пикселей. Отсутствие логотипа не гарантирует попадание на главную страницу</span>
+</p><br>
+<p>
+<script src='https://www.google.com/recaptcha/api.js'></script>
+<div class="g-recaptcha" data-sitekey="6LdVyv8SAAAAAOyTD27zazkIRqNOpfhrRF6jCP69"></div>
+</p>
+<p>
+<div class="box3 main_text" style="margin:-5px 0 20px 0;">
+Перед тем как нажать "Опубликовать", посмотрите внимательно - не нарушает ли топик наши <a href="/rules">правила</a>. В ином случае, не удивляйтесь, если Ваш контент будет удален нашей армией модераторов.
+</div>
+</p>
+
+<p>
+<button type="submit" name="submit_topic_publish" class="button-type button-green submit-topic-button">опубликовать</button>
+    
+'''
