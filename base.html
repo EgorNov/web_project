@@ -9,11 +9,31 @@
 </head>
   <body>
     <header>
-      <nav class="navbar navbar-light bg-light">
-        {% if "username" in session %}
-            <a class="navbar-brand" href="/logout">{{session['username']}}</a>
-        {% endif %}
-      </nav>
+      <nav class="navbar navbar-expand-lg navbar-light bg-light">
+  {% if "username" in session %}
+    <a class="navbar-brand" href="/logout">{{session['username']}}</a>
+{% endif %}
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+    <div class="navbar-nav">
+      <a class="nav-item nav-link active" href="">Профиль <span class="sr-only">(current)</span></a>
+      <a class="nav-item nav-link" href="#">О нас</a>
+       <li class="dropdown">
+          <a class="dropdown-toggle" data-toggle="dropdown">Раздел <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="https://vk.com/">Ссылка</a></li>
+            <li><a href="#">Ссылка</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="#">Ссылка</a></li>
+          </ul>
+        </li>
+        </ul>
+      <a class="nav-item nav-link disabled" href="#">Disabled</a>
+    </div>
+  </div>
+</nav>
     </header>
     <!-- Begin page content -->
     <main role="main" class="container">

@@ -17,6 +17,7 @@ class LoginForm(FlaskForm):
 
 class AddNewsForm(FlaskForm):
     title = StringField('Заголовок новости', validators=[DataRequired()])
+    short_dis = TextAreaField('Краткое описание', validators=[DataRequired()])
     content = TextAreaField('Текст новости', validators=[DataRequired()])
     submit = SubmitField('Добавить')
 
@@ -42,17 +43,18 @@ class NewsModel:
         cursor.execute('''CREATE TABLE IF NOT EXISTS news 
                             (id INTEGER PRIMARY KEY AUTOINCREMENT, 
                              title VARCHAR(100),
-                             content VARCHAR(1000),
+                             short_dis VARCHAR(500),
+                             content VARCHAR(10000),
                              user_id INTEGER
                              )''')
         cursor.close()
         self.connection.commit()
 
-    def insert(self, title, content, user_id):
+    def insert(self, title, short_dis, content, user_id):
         cursor = self.connection.cursor()
         cursor.execute('''INSERT INTO news 
-                          (title, content, user_id) 
-                          VALUES (?,?,?)''', (title, content, str(user_id)))
+                          (title, short_dis, content, user_id) 
+                          VALUES (?,?,?,?)''', (title, short_dis, content, str(user_id)))
         cursor.close()
         self.connection.commit()
 
@@ -64,12 +66,9 @@ class NewsModel:
 
     def get_all(self, user_id=None):
         cursor = self.connection.cursor()
-        if user_id:
-            cursor.execute("SELECT * FROM news WHERE user_id = ?",
-                           (str(user_id)))
-        else:
-            cursor.execute("SELECT * FROM news")
-        rows = cursor.fetchall()
+        cursor.execute("SELECT * FROM news ")
+        rows = cursor.fetchall()[::-1]
+        
         return rows
 
     def delete(self, news_id):
@@ -152,9 +151,10 @@ def add_news():
     form = AddNewsForm()
     if form.validate_on_submit():
         title = form.title.data
+        short_dis = form.short_dis.data
         content = form.content.data
         nm = NewsModel(db.get_connection())
-        nm.insert(title, content, session['user_id'])
+        nm.insert(title, short_dis, content, session['user_id'])
         return redirect("/index")
     return render_template('add_news.html', title='Добавление новости',
                            form=form, username=session['username'])
@@ -194,6 +194,11 @@ def reg():
         us.insert(request.form['username'], request.form['password'])
         return redirect('/')
 
+
+@app.route('/<news_id>')
+def news(news_id):
+    news = ns.get(news_id)
+    return render_template('watch_news.html', news=news)
 
 
 if __name__ == '__main__':

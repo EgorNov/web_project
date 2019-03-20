@@ -14,6 +14,15 @@
             {% endfor %}
         </p>
         <p>
+            {{ form.short_dis.label }}<br>
+            {{ form.short_dis}}<br>
+            {% for error in form.short_dis.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </p>
+        <p>
             {{ form.content.label }}<br>
             {{ form.content }}<br>
             {% for error in form.content.errors %}
