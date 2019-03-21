@@ -68,7 +68,7 @@ class NewsModel:
         cursor = self.connection.cursor()
         cursor.execute("SELECT * FROM news ")
         rows = cursor.fetchall()[::-1]
-        
+
         return rows
 
     def delete(self, news_id):
