@@ -3,5 +3,8 @@
 {% block content %}
     <h2>{{news[1]}}</h2>
     <div>{{news[3]}}</div>
-
+    <form action="" method="post" novalidate>
+        {{ form.hidden_tag() }}
+        <p>{{likes}}{{ form.submit() }}</p>
+    </form>
 {% endblock %}

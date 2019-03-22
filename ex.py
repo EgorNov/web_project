@@ -5,7 +5,7 @@ from wtforms import StringField, SubmitField, BooleanField, PasswordField, TextA
 from wtforms.validators import DataRequired
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
+app.config['SECRET_KEY'] = 'NovOsti_secret_key'
 
 
 class LoginForm(FlaskForm):
@@ -13,6 +13,10 @@ class LoginForm(FlaskForm):
     password = PasswordField('Пароль', validators=[DataRequired()])
     remember_me = BooleanField('Запомнить меня')
     submit = SubmitField('Войти')
+
+
+class NewsForm(FlaskForm):
+    submit = SubmitField('Нравится')
 
 
 class AddNewsForm(FlaskForm):
@@ -44,8 +48,10 @@ class NewsModel:
                             (id INTEGER PRIMARY KEY AUTOINCREMENT, 
                              title VARCHAR(100),
                              short_dis VARCHAR(500),
-                             content VARCHAR(10000),
-                             user_id INTEGER
+                             content MEDIUMTEXT,
+                             user_id INTEGER,
+                             users MEDIUMTEXT,
+                             likes INTEGER
                              )''')
         cursor.close()
         self.connection.commit()
@@ -53,8 +59,16 @@ class NewsModel:
     def insert(self, title, short_dis, content, user_id):
         cursor = self.connection.cursor()
         cursor.execute('''INSERT INTO news 
-                          (title, short_dis, content, user_id) 
-                          VALUES (?,?,?,?)''', (title, short_dis, content, str(user_id)))
+                          (title, short_dis, content, user_id, users, likes) 
+                          VALUES (?,?,?,?,?,?)''', (title, short_dis, content, str(user_id), ' ', 0))
+        cursor.close()
+        self.connection.commit()
+
+    def update(self, news_id, users, likes):
+        cursor = self.connection.cursor()
+        cursor.execute('''UPDATE news
+    SET users=?,likes=?
+    WHERE id=?''', (users, str(likes), str(news_id)))
         cursor.close()
         self.connection.commit()
 
@@ -195,10 +209,19 @@ def reg():
         return redirect('/')
 
 
-@app.route('/<news_id>')
+@app.route('/<news_id>', methods=['GET', 'POST'])
 def news(news_id):
     news = ns.get(news_id)
-    return render_template('watch_news.html', news=news)
+    print(news)
+    users = news[5]
+    if request.method == 'GET':
+        form = NewsForm()
+
+        return render_template('watch_news.html', news=news, form=form, likes=news[6])
+    elif request.method == 'POST':
+        if str(session['user_id']) not in users:
+            ns.update(news_id, users, news[6]+1)
+        return redirect('/' + str(news_id))
 
 
 if __name__ == '__main__':
