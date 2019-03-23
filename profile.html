@@ -1,8 +1,10 @@
 {% extends "base.html" %}
 
 {% block content %}
-
-    <a href="/add_news">Добавить новость</a>
+<div class="alert alert-dark" role="alert">
+    <h2>{{user[1]}}</h2>
+    <h1>Рейтинг: {{user[3]}}</h1>
+    Новости Пользователя:
     {% for item in news %}
         <div class="alert alert-dark" role="alert">
             <h2><a href={{item[0]}}>{{item[1]}}</a></h2>
@@ -10,4 +12,5 @@
 
         </div>
     {% endfor %}
+</div>
 {% endblock %}

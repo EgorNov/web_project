@@ -1,10 +1,21 @@
 {% extends "base.html" %}
 
 {% block content %}
+<div class="alert alert-dark" role="alert">
     <h2>{{news[1]}}</h2>
-    <div>{{news[3]}}</div>
+    <br>
+    {% for item in content %}
+        <div>{{item}}</div>
+    {%endfor%}
+    <br>
     <form action="" method="post" novalidate>
         {{ form.hidden_tag() }}
-        <p>{{likes}}{{ form.submit() }}</p>
+        <p> <h2>{{ form.submit() }} {{likes}}</p>
     </form>
+    <h2>Автор</h2>
+    <a href="/user/{{news[4]}}">{{user}}</a><br>
+    {% if session['user_id'] == news[4] %}
+        <a href="/delete_news/{{news[0]}}">Удалить новость</a>
+    {% endif %}
+</div>
 {% endblock %}
